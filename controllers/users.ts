@@ -3,15 +3,14 @@ import User from "../models/user";
 
 // calls to the database
 export const getUsers = async (req: Request, res: Response) => {
+    const errRes = { msg: 'Talk to an admin.'}
     try {
         const users = await User.findAll();
         // using the {} it returns an array
         res.json({users});
     } catch(e) {
         console.error(e)
-        res.status(500).json({
-            msg: 'Talk to an admin.'
-        })
+        res.status(500).json(errRes);
     }
 };
 
@@ -50,9 +49,14 @@ export const createUser = async (req: Request, res: Response) => {
                 msg: body.email + ' is being use.'
             })
         }
-        const user = new User(body);
-        await user.save();
-        res.json({user})
+        if(!body) {
+            return res.status(204).json({ msg: 'The body is empty!'})
+        } else {
+            // pass the body with the user creation data
+            const user = new User(body);
+            await user.save();
+            res.json({user})
+        }
     } catch(e) {
         console.error(e)
         res.status(500).json({

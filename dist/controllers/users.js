@@ -16,6 +16,7 @@ exports.deleteUser = exports.putUser = exports.createUser = exports.getUser = ex
 const user_1 = __importDefault(require("../models/user"));
 // calls to the database
 const getUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const errRes = { msg: 'Talk to an admin.' };
     try {
         const users = yield user_1.default.findAll();
         // using the {} it returns an array
@@ -23,9 +24,7 @@ const getUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
     catch (e) {
         console.error(e);
-        res.status(500).json({
-            msg: 'Talk to an admin.'
-        });
+        res.status(500).json(errRes);
     }
 });
 exports.getUsers = getUsers;
@@ -66,9 +65,15 @@ const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
                 msg: body.email + ' is being use.'
             });
         }
-        const user = new user_1.default(body);
-        yield user.save();
-        res.json({ user });
+        if (!body) {
+            return res.status(204).json({ msg: 'The body is empty!' });
+        }
+        else {
+            // pass the body with the user creation data
+            const user = new user_1.default(body);
+            yield user.save();
+            res.json({ user });
+        }
     }
     catch (e) {
         console.error(e);
